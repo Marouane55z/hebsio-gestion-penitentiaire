@@ -1,0 +1,14 @@
+# Compilation
+bin/
+*.class
+out/
+# Configuration locale (identifiants)
+config.properties
+# IDE
+.settings/
+.metadata/
+.idea/
+*.iml
+# Systèmes
+.DS_Store
+Thumbs.db

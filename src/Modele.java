@@ -44,10 +44,21 @@ public class Modele {
     private void chargerConnexion() {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
-            String url = "jdbc:mysql://172.16.203.101/HebSIO?serverTimezone=UTC";
-            String utilisateur = "sio";
-            String motDePasse = "slam";
-            
+            // Paramètres lus dans les variables d'environnement ou dans config.properties
+            // (voir config.example.properties) : aucun identifiant n'est écrit dans le code.
+            java.util.Properties config = new java.util.Properties();
+            java.io.File fichier = new java.io.File("config.properties");
+            if (fichier.exists()) {
+                try (java.io.FileInputStream in = new java.io.FileInputStream(fichier)) {
+                    config.load(in);
+                } catch (java.io.IOException erreur) {
+                    this.dernierMessage = "Erreur lecture config.properties : " + erreur.getMessage();
+                }
+            }
+            String url = lireParametre(config, "HEBSIO_DB_URL", "db.url", "jdbc:mysql://localhost/HebSIO?serverTimezone=UTC");
+            String utilisateur = lireParametre(config, "HEBSIO_DB_USER", "db.user", "");
+            String motDePasse = lireParametre(config, "HEBSIO_DB_PASSWORD", "db.password", "");
+
             this.connexion = DriverManager.getConnection(url, utilisateur, motDePasse);
             
         } catch (ClassNotFoundException erreur) { 
@@ -55,6 +66,18 @@ public class Modele {
         } catch (SQLException erreur) { 
             this.dernierMessage = "Erreur SQL Connexion : " + erreur.getMessage();
         }
+    }
+
+    /**
+     * Lit un paramètre de connexion : variable d'environnement en priorité,
+     * puis fichier config.properties, sinon valeur par défaut.
+     */
+    private String lireParametre(java.util.Properties config, String variable, String cle, String defaut) {
+        String valeur = System.getenv(variable);
+        if (valeur == null || valeur.isEmpty()) {
+            valeur = config.getProperty(cle, defaut);
+        }
+        return valeur;
     }
 
     // ========================================================================
